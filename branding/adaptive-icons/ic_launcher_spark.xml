@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spark Key Logo (Concept B) - Adaptive Icon -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/electric_blue"/>
+    <foreground android:drawable="@drawable/ic_launcher_foreground_spark"/>
+    <monochrome android:drawable="@drawable/ic_launcher_foreground_spark"/>
+</adaptive-icon>
+

@@ -1,0 +1,129 @@
+name: Android Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on semantic version tags (e.g., v1.0.0)
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write  # Required for signing with OIDC
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog generation
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release AAB
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Sign AAB (Placeholder)
+        run: |
+          echo "::warning::Signing step is a placeholder. Configure actual signing in production."
+          echo "Example signing command (configure in GitHub Secrets):"
+          echo "jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256"
+          echo "  -keystore \${{ secrets.KEYSTORE_FILE }}"
+          echo "  -storepass \${{ secrets.KEYSTORE_PASSWORD }}"
+          echo "  -keypass \${{ secrets.KEY_PASSWORD }}"
+          echo "  app/build/outputs/bundle/release/app-release.aab"
+          echo "  \${{ secrets.KEY_ALIAS }}"
+          # Copy unsigned AAB for now (replace with signed version in production)
+          cp app/build/outputs/bundle/release/app-release.aab app-release-unsigned.aab
+
+      - name: Sign APK (Placeholder)
+        run: |
+          echo "::warning::Signing step is a placeholder. Configure actual signing in production."
+          echo "Example signing command (configure in GitHub Secrets):"
+          echo "jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256"
+          echo "  -keystore \${{ secrets.KEYSTORE_FILE }}"
+          echo "  -storepass \${{ secrets.KEYSTORE_PASSWORD }}"
+          echo "  -keypass \${{ secrets.KEY_PASSWORD }}"
+          echo "  app/build/outputs/apk/release/app-release-unsigned.apk"
+          echo "  \${{ secrets.KEY_ALIAS }}"
+          # Copy unsigned APK for now (replace with signed version in production)
+          cp app/build/outputs/apk/release/app-release-unsigned.apk app-release-unsigned.apk
+
+      - name: Generate Changelog from PRs
+        id: changelog
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found. Generating changelog from all commits."
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            echo "Generating changelog from $PREV_TAG to $TAG"
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          # Extract PR titles from commit messages (if using conventional commits)
+          echo "$CHANGELOG" > CHANGELOG.md
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Version File
+        run: |
+          echo "Version: ${{ steps.version.outputs.version }}" > VERSION.txt
+          echo "Build Date: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> VERSION.txt
+          echo "Commit: ${{ github.sha }}" >> VERSION.txt
+          echo "Tag: ${{ github.ref_name }}" >> VERSION.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Changes in v${{ steps.version.outputs.version }}
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ---
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }}
+          files: |
+            app-release-unsigned.aab
+            app-release-unsigned.apk
+            VERSION.txt
+            CHANGELOG.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+

@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Keyboard Key Shape (Rounded Square) -->
+  <rect x="64" y="64" width="384" height="384" rx="32" ry="32" fill="#3A7BFF"/>
+  
+  <!-- Spark/Star at corner -->
+  <g transform="translate(400, 120)">
+    <!-- Spark shape -->
+    <path d="M 0 -40 L 8 -8 L 40 0 L 8 8 L 0 40 L -8 8 L -40 0 L -8 -8 Z" fill="#A0FFE9"/>
+    <!-- Inner spark -->
+    <path d="M 0 -20 L 4 -4 L 20 0 L 4 4 L 0 20 L -4 4 L -20 0 L -4 -4 Z" fill="#FFFFFF"/>
+  </g>
+  
+  <!-- Optional: Subtle "AI" text in center (minimal) -->
+  <text x="256" y="290" font-family="Inter, sans-serif" font-size="120" font-weight="bold" fill="white" text-anchor="middle" opacity="0.9">AI</text>
+</svg>
+

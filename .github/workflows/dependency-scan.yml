@@ -1,0 +1,154 @@
+name: Dependency Scan
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run weekly on Mondays at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  dependency-check:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'AI-Keyboard'
+          path: '.'
+          format: 'ALL'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            --enableExperimental
+
+      - name: Upload Dependency-Check Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-check-report
+          path: reports/
+          retention-days: 30
+
+      - name: Check for Outdated Dependencies
+        run: |
+          echo "Checking for outdated dependencies..."
+          ./gradlew dependencyUpdates --no-daemon || true
+          # Note: Add dependency-updates plugin to build.gradle.kts:
+          # id("com.github.ben-manes.versions") version "0.50.0"
+
+      - name: Upload Dependency Updates Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-updates
+          path: build/dependencyUpdates/
+          retention-days: 7
+
+  gradle-audit:
+    name: Gradle Dependency Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Run Gradle Dependency Verification
+        run: |
+          ./gradlew dependencies --no-daemon > dependencies.txt || true
+          ./gradlew dependencyInsight --dependency androidx.core:core-ktx --no-daemon || true
+
+      - name: Check License Compatibility
+        run: |
+          echo "Checking for license compatibility issues..."
+          # This is a placeholder - consider adding license-gradle-plugin
+          # or similar tool for license checking
+          echo "Consider adding license checking plugin for production use"
+
+      - name: Upload Dependency Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gradle-dependencies
+          path: dependencies.txt
+          retention-days: 7
+
+  notify-outdated:
+    name: Notify Outdated Dependencies
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    needs: [dependency-check, gradle-audit]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Dependency Reports
+        uses: actions/download-artifact@v4
+        with:
+          name: dependency-updates
+          path: ./reports
+
+      - name: Create Issue for Outdated Dependencies
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Check if there are outdated dependencies
+            const reportPath = path.join('./reports', 'report.txt');
+            let hasUpdates = false;
+            
+            try {
+              if (fs.existsSync(reportPath)) {
+                const content = fs.readFileSync(reportPath, 'utf8');
+                hasUpdates = content.includes('The following dependencies have later versions');
+              }
+            } catch (error) {
+              console.log('Could not read dependency report');
+            }
+            
+            if (hasUpdates) {
+              github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🔍 Weekly Dependency Update Check',
+                body: `A weekly dependency scan has detected potential updates.
+                
+                Please review the dependency update report in the workflow artifacts.
+                
+                Workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                labels: ['dependencies', 'automated']
+              });
+            } else {
+              console.log('No outdated dependencies found');
+            }
+

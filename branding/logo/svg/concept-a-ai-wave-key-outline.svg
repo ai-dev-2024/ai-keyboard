@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Keyboard Key Shape (Rounded Square) - Outline -->
+  <rect x="64" y="64" width="384" height="384" rx="32" ry="32" fill="none" stroke="#3A7BFF" stroke-width="24"/>
+  
+  <!-- AI Wave Monogram -->
+  <g transform="translate(256, 256)">
+    <!-- Letter A (simplified) -->
+    <path d="M -120 -60 L -80 60 L -40 60 L 0 -60 L -40 -60 Z" fill="none" stroke="#3A7BFF" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="-80" y1="0" x2="-40" y2="0" stroke="#3A7BFF" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- Wave/Speech Pattern -->
+    <path d="M -60 0 Q -30 -20 0 0 Q 30 20 60 0" fill="none" stroke="#3A7BFF" stroke-width="16" stroke-linecap="round"/>
+    <path d="M -60 30 Q -30 10 0 30 Q 30 50 60 30" fill="none" stroke="#3A7BFF" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- Letter I -->
+    <line x1="100" y1="-60" x2="100" y2="60" stroke="#3A7BFF" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="100" cy="-80" r="10" fill="#3A7BFF"/>
+  </g>
+</svg>
+

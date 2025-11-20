@@ -1,0 +1,207 @@
+# Fastfile for AI Keyboard Android App
+# Documentation: https://docs.fastlane.tools/getting-started/android/setup/
+
+default_platform(:android)
+
+platform :android do
+  # Default package name (can be overridden)
+  PACKAGE_NAME = "com.aikeyboard"
+
+  desc "Build release AAB"
+  lane :build do
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"] || "../app/keystore.jks",
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"] || "aikeyboard",
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+  end
+
+  desc "Build and upload to Play Store"
+  lane :deploy do |options|
+    # Get parameters
+    track = options[:track] || "internal"
+    package_name = options[:package_name] || PACKAGE_NAME
+    aab_path = options[:aab] || "../app/build/outputs/bundle/release/app-release.aab"
+    rollout_percentage = options[:rollout] || "100"
+    
+    # Validate AAB exists
+    unless File.exist?(aab_path)
+      UI.user_error!("AAB file not found at: #{aab_path}")
+    end
+
+    # Read changelog if available
+    changelog_path = "../CHANGELOG.txt"
+    changelog = if File.exist?(changelog_path)
+      File.read(changelog_path)
+    else
+      "Release notes not available. Please check git history for changes."
+    end
+
+    UI.message("📦 Uploading to Play Store")
+    UI.message("Package: #{package_name}")
+    UI.message("Track: #{track}")
+    UI.message("AAB: #{aab_path}")
+    UI.message("Rollout: #{rollout_percentage}%")
+
+    # Upload to Play Store
+    upload_to_play_store(
+      package_name: package_name,
+      track: track,
+      aab: aab_path,
+      release_status: track == "production" ? "in_progress" : "completed",
+      skip_upload_apk: true,
+      skip_upload_aab: false,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      changelog: changelog,
+      # Rollout percentage (only for production)
+      rollout: track == "production" ? rollout_percentage.to_f / 100.0 : nil
+    )
+
+    UI.success("✅ Successfully uploaded to Play Store #{track} track!")
+  end
+
+  desc "Upload to internal testing"
+  lane :internal do |options|
+    deploy(
+      track: "internal",
+      aab: options[:aab]
+    )
+  end
+
+  desc "Upload to alpha testing"
+  lane :alpha do |options|
+    deploy(
+      track: "alpha",
+      aab: options[:aab]
+    )
+  end
+
+  desc "Upload to beta testing"
+  lane :beta do |options|
+    deploy(
+      track: "beta",
+      aab: options[:aab]
+    )
+  end
+
+  desc "Upload to production"
+  lane :production do |options|
+    rollout = options[:rollout] || "10"
+    deploy(
+      track: "production",
+      aab: options[:aab],
+      rollout: rollout
+    )
+  end
+
+  desc "Build release APK (for direct distribution)"
+  lane :build_apk do
+    gradle(
+      task: "assemble",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"] || "../app/keystore.jks",
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"] || "aikeyboard",
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+  end
+
+  desc "Verify AAB signature"
+  lane :verify do |options|
+    aab_path = options[:aab] || "../app/build/outputs/bundle/release/app-release.aab"
+    
+    unless File.exist?(aab_path)
+      UI.user_error!("AAB file not found at: #{aab_path}")
+    end
+
+    UI.message("Verifying AAB signature...")
+    
+    # Use bundletool if available
+    if system("which bundletool > /dev/null 2>&1")
+      sh("bundletool verify --bundle=#{aab_path}")
+      UI.success("✅ AAB signature verified")
+    else
+      UI.important("⚠️  bundletool not found. Install it to verify AAB signatures.")
+      UI.message("AAB file exists at: #{aab_path}")
+      UI.message("File size: #{File.size(aab_path)} bytes")
+    end
+  end
+
+  desc "Show current version info"
+  lane :version do
+    # Extract version from build.gradle.kts
+    gradle_file = "../app/build.gradle.kts"
+    if File.exist?(gradle_file)
+      version_code = sh("grep -oP 'versionCode\\s*=\\s*\\K[0-9]+' #{gradle_file}", log: false).strip
+      version_name = sh("grep -oP 'versionName\\s*=\\s*\"\\K[^\"]+' #{gradle_file}", log: false).strip
+      
+      UI.message("📱 App Version Info")
+      UI.message("Version Code: #{version_code}")
+      UI.message("Version Name: #{version_name}")
+    else
+      UI.user_error!("build.gradle.kts not found")
+    end
+  end
+
+  desc "Increment version code"
+  lane :increment_version_code do
+    gradle_file = "../app/build.gradle.kts"
+    
+    unless File.exist?(gradle_file)
+      UI.user_error!("build.gradle.kts not found")
+    end
+
+    # Read current version code
+    content = File.read(gradle_file)
+    current_code = content.match(/versionCode\s*=\s*(\d+)/)[1].to_i
+    new_code = current_code + 1
+
+    # Replace version code
+    new_content = content.gsub(/versionCode\s*=\s*\d+/, "versionCode = #{new_code}")
+    File.write(gradle_file, new_content)
+
+    UI.success("✅ Incremented version code: #{current_code} → #{new_code}")
+  end
+
+  desc "Setup Fastlane (first time)"
+  lane :setup do
+    UI.message("🚀 Setting up Fastlane for AI Keyboard")
+    
+    # Check if service account JSON exists
+    service_account_path = "../app/play-service-account.json"
+    unless File.exist?(service_account_path)
+      UI.important("⚠️  Service account JSON not found at: #{service_account_path}")
+      UI.message("Please download it from Google Cloud Console and place it there.")
+      UI.message("See playstore-upload-guide.md for instructions.")
+    else
+      UI.success("✅ Service account JSON found")
+    end
+
+    # Check if keystore exists
+    keystore_path = "../app/keystore.jks"
+    unless File.exist?(keystore_path)
+      UI.important("⚠️  Keystore not found at: #{keystore_path}")
+      UI.message("Please generate a keystore and place it there.")
+      UI.message("See signing-config.md for instructions.")
+    else
+      UI.success("✅ Keystore found")
+    end
+
+    UI.message("")
+    UI.message("📚 Next steps:")
+    UI.message("1. Ensure service account JSON is configured")
+    UI.message("2. Ensure keystore is configured")
+    UI.message("3. Set GOOGLE_APPLICATION_CREDENTIALS environment variable")
+    UI.message("4. Run: fastlane android deploy track:internal")
+  end
+end
+

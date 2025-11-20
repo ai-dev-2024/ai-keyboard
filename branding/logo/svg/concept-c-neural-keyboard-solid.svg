@@ -1,0 +1,31 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Keyboard Key Shape (Rounded Square) -->
+  <rect x="64" y="64" width="384" height="384" rx="32" ry="32" fill="#3A7BFF"/>
+  
+  <!-- Neural Network Nodes -->
+  <g transform="translate(256, 256)">
+    <!-- Layer 1 Nodes -->
+    <circle cx="-120" cy="-60" r="16" fill="#A0FFE9"/>
+    <circle cx="-120" cy="0" r="16" fill="#A0FFE9"/>
+    <circle cx="-120" cy="60" r="16" fill="#A0FFE9"/>
+    
+    <!-- Layer 2 Nodes -->
+    <circle cx="0" cy="-80" r="20" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="24" fill="#FFFFFF" opacity="0.95"/>
+    <circle cx="0" cy="80" r="20" fill="#FFFFFF"/>
+    
+    <!-- Layer 3 Nodes -->
+    <circle cx="120" cy="-60" r="16" fill="#A0FFE9"/>
+    <circle cx="120" cy="0" r="16" fill="#A0FFE9"/>
+    <circle cx="120" cy="60" r="16" fill="#A0FFE9"/>
+    
+    <!-- Connections (simplified) -->
+    <line x1="-104" y1="-60" x2="-20" y2="-80" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
+    <line x1="-104" y1="0" x2="-20" y2="0" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
+    <line x1="-104" y1="60" x2="-20" y2="80" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
+    <line x1="20" y1="-80" x2="104" y2="-60" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
+    <line x1="20" y1="0" x2="104" y2="0" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
+    <line x1="20" y1="80" x2="104" y2="60" stroke="#FFFFFF" stroke-width="3" opacity="0.6"/>
+  </g>
+</svg>
+

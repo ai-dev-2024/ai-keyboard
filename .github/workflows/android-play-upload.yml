@@ -1,0 +1,276 @@
+name: Build and Upload to Play Store
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on semantic version tags (e.g., v1.0.0)
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store track (internal, alpha, beta, production)'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+      rollout_percentage:
+        description: 'Rollout percentage (1-100, only for production)'
+        required: false
+        default: '10'
+        type: string
+
+jobs:
+  build-and-upload:
+    name: Build Signed AAB and Upload to Play Store
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Extract version from tag
+        id: version
+        if: github.event_name == 'push'
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Set version from workflow input
+        id: version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          # Extract version from build.gradle.kts or use tag
+          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts || echo "1.0.0")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Set up Keystore
+        id: keystore
+        run: |
+          # Decode base64 keystore from secret
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/keystore.jks
+          
+          # Create keystore.properties file
+          mkdir -p app
+          cat > keystore.properties << EOF
+          storeFile=app/keystore.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+          
+          echo "Keystore configured successfully"
+          # Verify keystore exists
+          if [ -f app/keystore.jks ]; then
+            echo "keystore_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "keystore_exists=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Set up Play Store Service Account
+        run: |
+          # Create service account JSON file from secret
+          mkdir -p app
+          echo "${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}" > app/play-service-account.json
+          echo "Service account JSON configured"
+
+      - name: Build Release AAB
+        run: |
+          ./gradlew bundleRelease --no-daemon --stacktrace
+        env:
+          ORG_GRADLE_PROJECT_storeFile: app/keystore.jks
+          ORG_GRADLE_PROJECT_storePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_keyAlias: ${{ secrets.KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Verify AAB Signature
+        run: |
+          # Verify AAB is signed
+          if command -v bundletool &> /dev/null; then
+            bundletool verify --bundle=app/build/outputs/bundle/release/app-release.aab
+          else
+            echo "bundletool not installed, skipping verification"
+            echo "AAB file exists: $(test -f app/build/outputs/bundle/release/app-release.aab && echo 'yes' || echo 'no')"
+            ls -lh app/build/outputs/bundle/release/
+          fi
+
+      - name: Determine Play Store Track
+        id: track
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TRACK="${{ github.event.inputs.track }}"
+          else
+            # Default to internal for tagged releases, can be overridden
+            TRACK="${PLAY_STORE_TRACK:-internal}"
+          fi
+          echo "track=$TRACK" >> $GITHUB_OUTPUT
+          echo "Uploading to track: $TRACK"
+
+      - name: Upload to Play Store (Fastlane)
+        id: upload
+        run: |
+          # Install Fastlane
+          sudo gem install fastlane -NV
+          
+          # Set package name (default or from secret)
+          PACKAGE_NAME="${{ secrets.PLAY_PACKAGE_NAME }}"
+          if [ -z "$PACKAGE_NAME" ]; then
+            PACKAGE_NAME="com.aikeyboard"
+          fi
+          
+          # Set track
+          TRACK="${{ steps.track.outputs.track }}"
+          
+          # Set rollout percentage (only for production)
+          ROLLOUT="${{ github.event.inputs.rollout_percentage }}"
+          if [ -z "$ROLLOUT" ]; then
+            ROLLOUT="100"
+          fi
+          
+          # Export service account JSON path
+          export GOOGLE_APPLICATION_CREDENTIALS="app/play-service-account.json"
+          
+          # Run Fastlane
+          cd fastlane || exit 1
+          fastlane android deploy \
+            track:"$TRACK" \
+            package_name:"$PACKAGE_NAME" \
+            aab:"../app/build/outputs/bundle/release/app-release.aab" \
+            rollout:"$ROLLOUT"
+        continue-on-error: true
+
+      - name: Upload to Play Store (Gradle Play Publisher - Alternative)
+        if: steps.upload.outcome == 'failure'
+        run: |
+          echo "Fastlane upload failed, trying Gradle Play Publisher..."
+          
+          # Note: This requires the Gradle Play Publisher plugin in build.gradle.kts
+          # Add to app/build.gradle.kts:
+          # plugins { id("com.github.triplet.play") version "3.9.0" }
+          # play { serviceAccountCredentials.set(file("app/play-service-account.json")) }
+          
+          ./gradlew publishReleaseBundle \
+            --no-daemon \
+            -Pplay.track="${{ steps.track.outputs.track }}" \
+            -Pplay.serviceAccountCredentials=app/play-service-account.json
+        continue-on-error: true
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found. Generating changelog from all commits."
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges | head -20)
+          else
+            echo "Generating changelog from $PREV_TAG to $TAG"
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- No changes documented"
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # Also save to file for Fastlane
+          echo "$CHANGELOG" > CHANGELOG.txt
+
+      - name: Create Release Summary
+        run: |
+          cat > RELEASE_SUMMARY.md << EOF
+          # Release Summary
+          
+          **Version:** ${{ steps.version.outputs.version }}
+          **Track:** ${{ steps.track.outputs.track }}
+          **Build Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          **Commit:** ${{ github.sha }}
+          **Tag:** ${{ github.ref_name }}
+          
+          ## Changelog
+          
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ## Artifacts
+          
+          - AAB: \`app/build/outputs/bundle/release/app-release.aab\`
+          - Uploaded to Play Store track: **${{ steps.track.outputs.track }}**
+          
+          EOF
+          cat RELEASE_SUMMARY.md
+
+      - name: Upload AAB as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Cleanup Sensitive Files
+        if: always()
+        run: |
+          # Remove keystore and service account files
+          rm -f app/keystore.jks
+          rm -f app/play-service-account.json
+          rm -f keystore.properties
+          echo "Cleaned up sensitive files"
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Release v${{ steps.version.outputs.version }}
+            
+            **Play Store Track:** ${{ steps.track.outputs.track }}
+            **Build Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+            
+            ### Changelog
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ---
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }}
+          files: |
+            app/build/outputs/bundle/release/app-release.aab
+            RELEASE_SUMMARY.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+

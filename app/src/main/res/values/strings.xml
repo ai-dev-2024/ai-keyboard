@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AI Keyboard</string>
+    <string name="keyboard_name">AI Keyboard</string>
+    <string name="settings_title">AI Keyboard Settings</string>
+    
+    <!-- Voice Input -->
+    <string name="voice_input">Voice Input</string>
+    <string name="voice_input_enabled">Voice Input Enabled</string>
+    <string name="voice_input_models">Models</string>
+    <string name="voice_input_active_model">Active Model</string>
+    <string name="voice_input_install_model">Install Model</string>
+    <string name="voice_input_delete_model">Delete Model</string>
+    <string name="voice_input_download_model">Download Model</string>
+    <string name="voice_input_model_size">Model Size</string>
+    <string name="voice_input_model_languages">Languages</string>
+    <string name="voice_input_model_ram">Min RAM Required</string>
+    
+    <!-- Settings -->
+    <string name="settings_appearance">Appearance &amp; Themes</string>
+    <string name="settings_typing">Typing &amp; Auto-correct</string>
+    <string name="settings_clipboard">Clipboard Manager</string>
+    <string name="settings_emoji">Emoji &amp; GIF</string>
+    <string name="settings_voice">AI Voice Input</string>
+    <string name="settings_about">About</string>
+    
+    <!-- Ko-fi -->
+    <string name="ko_fi_support">Support AI Keyboard ❤️ — Buy me a coffee ☕</string>
+    <string name="ko_fi_url">https://ko-fi.com/ai_dev_2024</string>
+    
+    <!-- General -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="loading">Loading…</string>
+    <string name="error">Error</string>
+</resources>
+

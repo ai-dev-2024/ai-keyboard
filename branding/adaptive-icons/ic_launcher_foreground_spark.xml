@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spark Key Logo - Foreground -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    
+    <group
+        android:translateX="400"
+        android:translateY="120">
+        
+        <!-- Spark shape -->
+        <path
+            android:fillColor="#A0FFE9"
+            android:pathData="M 0,-40 L 8,-8 L 40,0 L 8,8 L 0,40 L -8,8 L -40,0 L -8,-8 Z"/>
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M 0,-20 L 4,-4 L 20,0 L 4,4 L 0,20 L -4,4 L -20,0 L -4,-4 Z"/>
+    </group>
+    
+    <!-- AI text in center -->
+    <text
+        android:text="AI"
+        android:textColor="#FFFFFF"
+        android:textSize="120"
+        android:textStyle="bold"
+        android:x="256"
+        android:y="290"
+        android:textAlign="center"/>
+</vector>
+

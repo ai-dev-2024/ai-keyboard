@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Keyboard Key Shape (Rounded Square) - Outline -->
+  <rect x="64" y="64" width="384" height="384" rx="32" ry="32" fill="none" stroke="#3A7BFF" stroke-width="24"/>
+  
+  <!-- Spark/Star at corner -->
+  <g transform="translate(400, 120)">
+    <path d="M 0 -40 L 8 -8 L 40 0 L 8 8 L 0 40 L -8 8 L -40 0 L -8 -8 Z" fill="#FF2BA3" stroke="#3A7BFF" stroke-width="4"/>
+    <circle cx="0" cy="0" r="12" fill="#FF2BA3"/>
+  </g>
+</svg>
+

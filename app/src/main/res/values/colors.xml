@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AI Keyboard Brand Colors -->
+    <color name="electric_blue">#3A7BFF</color>
+    <color name="deep_indigo">#1E2A55</color>
+    <color name="ai_teal">#00C7B7</color>
+    <color name="sky_mint">#A0FFE9</color>
+    <color name="magenta_pulse">#FF2BA3</color>
+    <color name="ai_gold">#F9D65C</color>
+    <color name="pure_white">#FFFFFF</color>
+    <color name="soft_gray">#E8EAF0</color>
+    <color name="dark_charcoal">#1D1D1F</color>
+    
+    <!-- Legacy -->
+    <color name="ic_launcher_background">#3A7BFF</color>
+</resources>

@@ -16,6 +16,7 @@ import com.aikeyboard.voiceinput.modelmanager.ModelManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -146,7 +147,9 @@ class VoiceInputService @Inject constructor(
 
     fun cleanup() {
         scope.cancel()
-        currentEngine?.unloadModel()
+        scope.launch {
+            currentEngine?.unloadModel()
+        }
         currentEngine = null
     }
 

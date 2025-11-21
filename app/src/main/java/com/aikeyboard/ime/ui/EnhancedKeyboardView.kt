@@ -25,10 +25,13 @@ fun EnhancedKeyboardView(
 ) {
     var showEmojiPicker by remember { mutableStateOf(false) }
     var currentText by remember { mutableStateOf("") }
+    
+    // Get ViewModel state
     val suggestions by viewModel.suggestions.collectAsState()
     val isVoiceRecording by viewModel.isVoiceRecording.collectAsState()
     val partialTranscription by viewModel.partialTranscription.collectAsState()
     val keycapShape by viewModel.keycapShape.collectAsState()
+    
     val scope = rememberCoroutineScope()
 
     Column(
@@ -55,7 +58,7 @@ fun EnhancedKeyboardView(
             // Suggestions bar with voice transcription
             SuggestionsBar(
                 suggestions = if (partialTranscription != null) {
-                    listOf(partialTranscription!!) + suggestions
+                    listOf<String>(partialTranscription!!) + suggestions
                 } else {
                     suggestions
                 },
@@ -233,6 +236,50 @@ fun KeyButton(
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
             )
         }
+    }
+}
+
+@Composable
+fun SuggestionsBar(
+    suggestions: List<String>,
+    onSuggestionClick: (String) -> Unit
+) {
+    if (suggestions.isEmpty()) return
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(40.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+    ) {
+        suggestions.take(5).forEach { suggestion ->
+            SuggestionChip(
+                text = suggestion,
+                onClick = { onSuggestionClick(suggestion) }
+            )
+        }
+    }
+}
+
+@Composable
+fun SuggestionChip(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.padding(vertical = 2.dp)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }
 

@@ -16,11 +16,25 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AIKeyboardDatabase {
-        return Room.databaseBuilder(
-            context,
-            AIKeyboardDatabase::class.java,
-            "aikeyboard.db"
-        ).build()
+        return try {
+            Room.databaseBuilder(
+                context,
+                AIKeyboardDatabase::class.java,
+                "aikeyboard.db"
+            )
+            .fallbackToDestructiveMigration() // Prevent crashes on schema changes
+            .build()
+        } catch (e: Exception) {
+            android.util.Log.e("DatabaseModule", "Failed to create database", e)
+            // Return a fallback database instance
+            Room.databaseBuilder(
+                context,
+                AIKeyboardDatabase::class.java,
+                "aikeyboard_fallback.db"
+            )
+            .fallbackToDestructiveMigration()
+            .build()
+        }
     }
 
     @Provides
@@ -29,4 +43,15 @@ object DatabaseModule {
     @Provides
     fun provideClipboardDao(database: AIKeyboardDatabase) = database.clipboardDao()
 }
+
+
+
+
+
+
+
+
+
+
+
 

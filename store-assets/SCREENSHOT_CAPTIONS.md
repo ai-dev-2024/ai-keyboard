@@ -137,3 +137,14 @@ Detailed captions for Play Store screenshots.
 
 **Last Updated**: November 2024
 
+
+
+
+
+
+
+
+
+
+
+

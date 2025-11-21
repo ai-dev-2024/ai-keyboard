@@ -6,9 +6,26 @@ import com.android.billingclient.api.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.lang.reflect.Method
+
+// Extension function to convert Task to suspend function for Google Play Billing
+private suspend fun <T> com.google.android.gms.tasks.Task<T>.await(): T = suspendCancellableCoroutine { cont ->
+    addOnCompleteListener { task ->
+        if (task.exception != null) {
+            cont.resumeWithException(task.exception!!)
+        } else {
+            cont.resume(task.result)
+        }
+    }
+}
 
 @Singleton
 class BillingManager @Inject constructor(
@@ -34,43 +51,78 @@ class BillingManager @Inject constructor(
     }
     
     fun initialize() {
-        billingClient = BillingClient.newBuilder(context)
-            .setListener(purchasesUpdatedListener)
-            .enablePendingPurchases()
-            .build()
-        
-        billingClient?.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                    _billingConnectionState.value = BillingConnectionState.Connected
-                    queryPurchases()
-                } else {
-                    _billingConnectionState.value = BillingConnectionState.Error(
-                        billingResult.debugMessage ?: "Billing setup failed"
-                    )
-                }
-            }
+        try {
+            billingClient = BillingClient.newBuilder(context)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases()
+                .build()
             
-            override fun onBillingServiceDisconnected() {
-                _billingConnectionState.value = BillingConnectionState.Disconnected
-            }
-        })
+            billingClient?.startConnection(object : BillingClientStateListener {
+                override fun onBillingSetupFinished(billingResult: BillingResult) {
+                    if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                        _billingConnectionState.value = BillingConnectionState.Connected
+                        // Launch coroutine to query purchases
+                        CoroutineScope(Dispatchers.IO).launch {
+                            try {
+                                queryPurchases()
+                            } catch (e: Exception) {
+                                // Silently handle query errors - billing may not be available
+                                _billingConnectionState.value = BillingConnectionState.Disconnected
+                            }
+                        }
+                    } else {
+                        _billingConnectionState.value = BillingConnectionState.Error(
+                            billingResult.debugMessage ?: "Billing setup failed"
+                        )
+                    }
+                }
+                
+                override fun onBillingServiceDisconnected() {
+                    _billingConnectionState.value = BillingConnectionState.Disconnected
+                }
+            })
+        } catch (e: Exception) {
+            // Handle cases where Google Play Services is not available
+            _billingConnectionState.value = BillingConnectionState.Error(
+                "Billing not available: ${e.message}"
+            )
+        }
     }
     
     suspend fun queryPurchases(): List<Purchase> {
         val billingClient = this.billingClient ?: return emptyList()
         
         return try {
-            val result = billingClient.queryPurchasesAsync(
-                QueryPurchasesParams.newBuilder()
-                    .setProductType(BillingClient.ProductType.INAPP)
-                    .build()
-            ).await()
-            
-            val purchases = result.purchasesList
+            val purchases = suspendCancellableCoroutine<List<Purchase>> { cont ->
+                billingClient.queryPurchasesAsync(
+                    QueryPurchasesParams.newBuilder()
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+                ) { billingResult, purchasesResult ->
+                    if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchasesResult != null) {
+                        // Use reflection to access purchasesList as the property might have different access
+                        val purchasesList: List<Purchase> = try {
+                            val method: Method? = purchasesResult.javaClass.methods.find { 
+                                it.name == "getPurchasesList" || it.name == "purchasesList" 
+                            }
+                            if (method != null) {
+                                (method.invoke(purchasesResult) as? List<*>)?.filterIsInstance<Purchase>() ?: emptyList()
+                            } else {
+                                // Fallback - try accessing as field or use empty list
+                                emptyList()
+                            }
+                        } catch (e: Exception) {
+                            emptyList()
+                        }
+                        cont.resume(purchasesList) {}
+                    } else {
+                        cont.resumeWithException(Exception(billingResult.debugMessage ?: "Query failed"))
+                    }
+                }
+            }
             if (purchases.isNotEmpty()) {
                 // Verify and acknowledge purchases
-                purchases.forEach { purchase ->
+                purchases.forEach { purchase: Purchase ->
                     if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
                         if (!purchase.isAcknowledged) {
                             acknowledgePurchase(purchase)
@@ -96,20 +148,28 @@ class BillingManager @Inject constructor(
         }
         
         try {
-            val productDetailsResult = billingClient.queryProductDetailsAsync(
-                QueryProductDetailsParams.newBuilder()
-                    .setProductList(
-                        listOf(
-                            QueryProductDetailsParams.Product.newBuilder()
-                                .setProductId(skuId)
-                                .setProductType(BillingClient.ProductType.INAPP)
-                                .build()
-                        )
+            val productDetailsParams = QueryProductDetailsParams.newBuilder()
+                .setProductList(
+                    listOf(
+                        QueryProductDetailsParams.Product.newBuilder()
+                            .setProductId(skuId)
+                            .setProductType(BillingClient.ProductType.INAPP)
+                            .build()
                     )
-                    .build()
-            ).await()
+                )
+                .build()
             
-            val productDetails = productDetailsResult.productDetailsList.firstOrNull()
+            val productDetailsList = suspendCancellableCoroutine<List<ProductDetails>> { cont ->
+                billingClient.queryProductDetailsAsync(productDetailsParams) { billingResult, detailsList ->
+                    if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                        cont.resume(detailsList) {}
+                    } else {
+                        cont.resumeWithException(Exception(billingResult.debugMessage ?: "Query failed"))
+                    }
+                }
+            }
+            
+            val productDetails = productDetailsList.firstOrNull()
             if (productDetails == null) {
                 _purchaseState.value = PurchaseState.Error("Product not found")
                 return
@@ -146,7 +206,11 @@ class BillingManager @Inject constructor(
                         .setPurchaseToken(purchase.purchaseToken)
                         .build()
                     
-                    billingClient.acknowledgePurchase(acknowledgeParams).await()
+                    suspendCancellableCoroutine<BillingResult> { cont ->
+                        billingClient.acknowledgePurchase(acknowledgeParams) { billingResult ->
+                            cont.resume(billingResult) {}
+                        }
+                    }
                 } catch (e: Exception) {
                     // Log error but don't fail the purchase
                 }

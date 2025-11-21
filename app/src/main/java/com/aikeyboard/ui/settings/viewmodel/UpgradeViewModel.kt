@@ -25,9 +25,9 @@ class UpgradeViewModel @Inject constructor(
             initialValue = false
         )
     
-    val purchaseState: StateFlow<PurchaseState> = billingManager.purchaseState.asStateFlow()
+    val purchaseState: StateFlow<PurchaseState> = billingManager.purchaseState
     
-    val billingConnectionState = billingManager.billingConnectionState.asStateFlow()
+    val billingConnectionState = billingManager.billingConnectionState
     
     init {
         // Observe purchase state changes and update premium status

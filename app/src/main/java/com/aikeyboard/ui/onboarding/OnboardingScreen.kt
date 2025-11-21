@@ -1,6 +1,9 @@
 package com.aikeyboard.ui.onboarding
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
@@ -24,6 +27,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
+import com.aikeyboard.shared.util.KeyboardUtils
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +38,17 @@ fun OnboardingScreen(
     var currentStep by remember { mutableStateOf(0) }
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    var isKeyboardEnabled by remember { mutableStateOf(false) }
+    var isKeyboardDefault by remember { mutableStateOf(false) }
+    
+    // Check keyboard status periodically
+    LaunchedEffect(Unit) {
+        while (true) {
+            isKeyboardEnabled = KeyboardUtils.isKeyboardEnabled(context)
+            isKeyboardDefault = KeyboardUtils.isKeyboardDefault(context)
+            delay(500) // Check every 500ms
+        }
+    }
     
     val steps = listOf(
         OnboardingStep(
@@ -44,26 +60,37 @@ fun OnboardingScreen(
         ),
         OnboardingStep(
             title = "Enable the Keyboard",
-            description = "To use AI Keyboard, you need to enable it in your device settings.",
+            description = if (isKeyboardEnabled) {
+                "✓ AI Keyboard is enabled!\n\nYou can now proceed to set it as default."
+            } else {
+                "To use AI Keyboard, you need to enable it in your device settings.\n\n1. Tap 'Open Settings' below\n2. Find 'AI Keyboard' in the list\n3. Toggle it ON\n4. Tap 'OK' when prompted"
+            },
             icon = Icons.Default.Settings,
-            showNext = true,
-            actionText = "Open Settings",
-            onAction = {
-                val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
-                context.startActivity(intent)
+            showNext = isKeyboardEnabled,
+            actionText = if (isKeyboardEnabled) null else "Open Settings",
+            onAction = if (isKeyboardEnabled) null else {
+                {
+                    KeyboardUtils.openInputMethodSettings(context)
+                }
             }
         ),
         OnboardingStep(
-            title = "Select AI Keyboard",
-            description = "1. Tap on 'AI Keyboard' in the list\n2. Toggle it ON\n3. Tap 'OK' when prompted",
-            icon = Icons.Default.CheckCircle,
-            showNext = true
-        ),
-        OnboardingStep(
-            title = "Set as Default (Optional)",
-            description = "You can set AI Keyboard as your default keyboard, or switch between keyboards anytime.",
+            title = "Set as Default",
+            description = if (isKeyboardDefault) {
+                "✓ AI Keyboard is your default keyboard!\n\nYou're all set to start typing."
+            } else if (isKeyboardEnabled) {
+                "Make AI Keyboard your default keyboard for seamless typing.\n\n1. Tap 'Set as Default' below\n2. Select 'AI Keyboard' from the list\n3. Confirm your selection"
+            } else {
+                "Please enable AI Keyboard first (previous step)."
+            },
             icon = Icons.Default.Star,
-            showNext = true
+            showNext = isKeyboardDefault,
+            actionText = if (isKeyboardDefault) null else if (isKeyboardEnabled) "Set as Default" else null,
+            onAction = if (isKeyboardDefault || !isKeyboardEnabled) null else {
+                {
+                    KeyboardUtils.openInputMethodSettings(context)
+                }
+            }
         ),
         OnboardingStep(
             title = "Voice Input Setup",
@@ -105,7 +132,7 @@ fun OnboardingScreen(
         ) {
             // Progress indicator
             LinearProgressIndicator(
-                progress = { (currentStep + 1) / steps.size.toFloat() },
+                progress = (currentStep + 1) / steps.size.toFloat(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)

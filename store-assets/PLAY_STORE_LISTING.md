@@ -198,3 +198,14 @@ speech recognition offline
 
 **Last Updated**: November 2024
 
+
+
+
+
+
+
+
+
+
+
+

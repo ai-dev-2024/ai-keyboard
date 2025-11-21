@@ -342,9 +342,6 @@ class ASRTestingViewModel @Inject constructor(
                 latencyTracker.endChunk()
                 
                 val transcriptionTime = System.currentTimeMillis() - transcriptionStart
-                val transcriptionTime = System.currentTimeMillis() - transcriptionStart
-                val duration = testAudioManager.getClipDuration(audioFile) / 1000.0
-                
                 val duration = testAudioManager.getClipDuration(audioFile) / 1000.0
                 
                 when (result) {

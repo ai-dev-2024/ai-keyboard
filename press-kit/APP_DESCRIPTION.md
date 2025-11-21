@@ -82,3 +82,14 @@ Experience typing reimagined — powered by offline AI.
 
 **Last Updated**: November 2024
 
+
+
+
+
+
+
+
+
+
+
+

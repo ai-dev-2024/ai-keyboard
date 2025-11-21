@@ -19,3 +19,14 @@ abstract class AIKeyboardDatabase : RoomDatabase() {
     abstract fun clipboardDao(): ClipboardDao
 }
 
+
+
+
+
+
+
+
+
+
+
+

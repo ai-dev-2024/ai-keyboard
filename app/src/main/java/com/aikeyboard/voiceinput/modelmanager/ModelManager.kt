@@ -2,11 +2,16 @@ package com.aikeyboard.voiceinput.modelmanager
 
 import android.content.Context
 import android.util.Log
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.security.MessageDigest
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -110,6 +115,31 @@ class ModelManager @Inject constructor(
         }
     }
 
+    fun downloadModelFromUrl(baseUrl: String, modelId: String? = null): UUID {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val inputData = androidx.work.Data.Builder()
+            .putString(ModelDownloadWorker.KEY_BASE_URL, baseUrl)
+            .apply {
+                if (modelId != null) {
+                    putString(ModelDownloadWorker.KEY_MODEL_ID, modelId)
+                }
+            }
+            .build()
+
+        val downloadWork = OneTimeWorkRequestBuilder<ModelDownloadWorker>()
+            .setConstraints(constraints)
+            .setInputData(inputData)
+            .build()
+
+        WorkManager.getInstance(context).enqueue(downloadWork)
+        
+        Log.d(TAG, "Enqueued model download work: ${downloadWork.id}")
+        return downloadWork.id
+    }
+
     private fun calculateSHA256(file: File): String {
         val digest = MessageDigest.getInstance("SHA-256")
         file.inputStream().use { input ->
@@ -135,4 +165,14 @@ data class InstalledModel(
     val manifest: ModelManifest,
     val isInstalled: Boolean
 )
+
+
+
+
+
+
+
+
+
+
 

@@ -15,43 +15,33 @@
         <path
             android:fillColor="#FFFFFF"
             android:pathData="M -60,-50 L -40,50 L -20,50 L 0,-50 L -20,-50 Z"/>
-        <line
+        <path
             android:strokeColor="#FFFFFF"
             android:strokeWidth="8"
-            android:strokeLinecap="round"
-            android:x1="-40"
-            android:y1="0"
-            android:x2="-20"
-            android:y2="0"/>
+            android:fillColor="@android:color/transparent"
+            android:pathData="M -40,0 L -20,0"/>
         
         <!-- Wave/Speech Pattern -->
         <path
             android:strokeColor="#FFFFFF"
             android:strokeWidth="10"
-            android:strokeLinecap="round"
             android:fillColor="@android:color/transparent"
             android:pathData="M -30,0 Q -15,-15 0,0 Q 15,15 30,0"/>
         <path
             android:strokeColor="#FFFFFF"
             android:strokeWidth="10"
-            android:strokeLinecap="round"
             android:fillColor="@android:color/transparent"
             android:pathData="M -30,20 Q -15,5 0,20 Q 15,35 30,20"/>
         
         <!-- Letter I -->
-        <line
+        <path
             android:strokeColor="#FFFFFF"
             android:strokeWidth="14"
-            android:strokeLinecap="round"
-            android:x1="50"
-            android:y1="-50"
-            android:x2="50"
-            android:y2="50"/>
-        <circle
+            android:fillColor="@android:color/transparent"
+            android:pathData="M 50,-50 L 50,50"/>
+        <path
             android:fillColor="#FFFFFF"
-            android:cx="50"
-            android:cy="-60"
-            android:r="6"/>
+            android:pathData="M 50,-60 A 6,6 0 1,1 50,-48 A 6,6 0 1,1 50,-60 Z"/>
     </group>
 </vector>
 

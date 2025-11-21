@@ -102,5 +102,28 @@ class SettingsViewModel @Inject constructor(
             preferencesManager.setKeyboardHeight(height)
         }
     }
+
+    fun downloadModelFromUrl(url: String, modelId: String? = null): Result<Unit> {
+        return try {
+            // Normalize URL - if it's a direct file URL, extract base URL
+            val baseUrl = if (url.endsWith(".onnx") || url.endsWith(".zip") || url.endsWith("/")) {
+                // If it ends with a file extension, try to get the directory
+                val lastSlash = url.lastIndexOf("/")
+                if (lastSlash > 0) {
+                    url.substring(0, lastSlash + 1)
+                } else {
+                    url
+                }
+            } else {
+                // Ensure it ends with /
+                if (url.endsWith("/")) url else "$url/"
+            }
+            
+            modelManager.downloadModelFromUrl(baseUrl, modelId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 

@@ -11,82 +11,57 @@
         android:translateY="256">
         
         <!-- Mic base -->
-        <rect
+        <path
             android:fillColor="#FFFFFF"
             android:fillAlpha="0.9"
-            android:x="-40"
-            android:y="40"
-            android:width="80"
-            android:height="120"
-            android:rx="16"
-            android:ry="16"/>
+            android:pathData="M -40,56 Q -40,40 -24,40 L 24,40 Q 40,40 40,56 L 40,160 Q 40,176 24,176 L -24,176 Q -40,176 -40,160 Z"/>
         
         <!-- Mic body -->
-        <rect
+        <path
             android:fillColor="#FFFFFF"
-            android:x="-30"
-            android:y="-80"
-            android:width="60"
-            android:height="120"
-            android:rx="12"
-            android:ry="12"/>
+            android:pathData="M -30,-68 Q -30,-80 -18,-80 L 18,-80 Q 30,-80 30,-68 L 30,52 Q 30,64 18,64 L -18,64 Q -30,64 -30,52 Z"/>
         
         <!-- Mic grille lines -->
-        <line
+        <path
             android:strokeColor="#3A7BFF"
             android:strokeWidth="3"
             android:strokeAlpha="0.6"
-            android:x1="-25"
-            android:y1="-70"
-            android:x2="-25"
-            android:y2="-10"/>
-        <line
+            android:fillColor="@android:color/transparent"
+            android:pathData="M -25,-70 L -25,-10"/>
+        <path
             android:strokeColor="#3A7BFF"
             android:strokeWidth="3"
             android:strokeAlpha="0.6"
-            android:x1="-10"
-            android:y1="-70"
-            android:x2="-10"
-            android:y2="-10"/>
-        <line
+            android:fillColor="@android:color/transparent"
+            android:pathData="M -10,-70 L -10,-10"/>
+        <path
             android:strokeColor="#3A7BFF"
             android:strokeWidth="3"
             android:strokeAlpha="0.6"
-            android:x1="5"
-            android:y1="-70"
-            android:x2="5"
-            android:y2="-10"/>
-        <line
+            android:fillColor="@android:color/transparent"
+            android:pathData="M 5,-70 L 5,-10"/>
+        <path
             android:strokeColor="#3A7BFF"
             android:strokeWidth="3"
             android:strokeAlpha="0.6"
-            android:x1="20"
-            android:y1="-70"
-            android:x2="20"
-            android:y2="-10"/>
+            android:fillColor="@android:color/transparent"
+            android:pathData="M 20,-70 L 20,-10"/>
         
         <!-- Mic stand -->
-        <rect
+        <path
             android:fillColor="#A0FFE9"
-            android:x="-8"
-            android:y="40"
-            android:width="16"
-            android:height="20"
-            android:rx="4"
-            android:ry="4"/>
+            android:pathData="M -8,44 Q -8,40 -4,40 L 4,40 Q 8,40 8,44 L 8,60 Q 8,64 4,64 L -4,64 Q -8,64 -8,60 Z"/>
         
         <!-- Sound waves -->
         <path
             android:strokeColor="#A0FFE9"
             android:strokeWidth="6"
-            android:strokeLinecap="round"
             android:strokeAlpha="0.8"
             android:fillColor="@android:color/transparent"
             android:pathData="M 0,-90 Q -30,-110 -60,-90"/>
         <path
             android:strokeColor="#A0FFE9"
             android:strokeWidth="6"
-            android:strokeLinecap="round"
             android:strokeAlpha="0.8"
             android:fillColor="@android:color/transparent"
             android:pathData="M 0,-90 Q 30,-110 60,-90"/>

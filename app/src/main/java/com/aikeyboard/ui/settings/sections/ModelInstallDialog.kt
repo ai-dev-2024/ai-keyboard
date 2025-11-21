@@ -20,6 +20,10 @@ fun ModelInstallDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text("Choose how to install the model:")
+                Text(
+                    text = "• From File: Select a model directory containing manifest.json and model files\n• From URL: Download a model from a URL",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         },
         confirmButton = {
@@ -28,13 +32,11 @@ fun ModelInstallDialog(
             ) {
                 TextButton(onClick = {
                     onInstallFromFile()
-                    onDismiss()
                 }) {
                     Text("From File")
                 }
                 TextButton(onClick = {
                     onDownloadFromUrl()
-                    onDismiss()
                 }) {
                     Text("From URL")
                 }
@@ -47,4 +49,56 @@ fun ModelInstallDialog(
         }
     )
 }
+
+@Composable
+fun ModelUrlDialog(
+    onDismiss: () -> Unit,
+    onDownload: (String) -> Unit
+) {
+    var urlText by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Download Model from URL") },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("Enter the URL of the model to download:")
+                OutlinedTextField(
+                    value = urlText,
+                    onValueChange = { urlText = it },
+                    label = { Text("Model URL") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (urlText.isNotBlank()) {
+                        onDownload(urlText)
+                    }
+                },
+                enabled = urlText.isNotBlank()
+            ) {
+                Text("Download")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+
+
+
+
+
+
+
 

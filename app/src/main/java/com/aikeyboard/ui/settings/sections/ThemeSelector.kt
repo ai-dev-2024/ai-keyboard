@@ -188,7 +188,8 @@ fun KeycapShapeSelector(
                 KeycapShapeOption(
                     shape = shape,
                     isSelected = selectedShape == shape,
-                    onClick = { onShapeSelected(shape) }
+                    onClick = { onShapeSelected(shape) },
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -205,7 +206,8 @@ enum class KeycapShape(val displayName: String, val cornerRadius: Int) {
 fun KeycapShapeOption(
     shape: KeycapShape,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.1f else 1f,
@@ -217,8 +219,7 @@ fun KeycapShapeOption(
     )
     
     Column(
-        modifier = Modifier
-            .weight(1f)
+        modifier = modifier
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)

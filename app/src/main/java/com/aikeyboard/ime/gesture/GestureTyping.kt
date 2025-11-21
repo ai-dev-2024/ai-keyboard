@@ -83,3 +83,14 @@ fun GestureTypingHandler(
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+

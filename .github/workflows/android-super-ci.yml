@@ -5,6 +5,21 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    # Run every day at 2 AM UTC (equivalent to 8 AM Bangladesh time)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - debug-only
+          - test-only
+          - release-only
 
 env:
   JAVA_VERSION: 17
@@ -174,7 +189,7 @@ jobs:
           echo "No test results directory found"
         fi
         
-    - name: 🔍 Parse Crash Logs and Generate Report
+    - name: 🐍 Run Firebase Results Parser
       run: |
         echo "=== FIREBASE TEST LAB ANALYSIS ==="
         echo "Timestamp: $(date)"
@@ -182,47 +197,32 @@ jobs:
         echo "Commit: ${{ github.sha }}"
         echo ""
         
-        # Check for crash logs in various formats
-        echo "🔍 Searching for crash information..."
+        # Make Python script executable and run it
+        chmod +x scripts/parse_firebase_results.py
+        python3 scripts/parse_firebase_results.py ./test-results
+        PARSER_EXIT_CODE=$?
         
-        # Search for FATAL EXCEPTION patterns
-        if [ -d "./test-results" ]; then
-          echo "Searching test results for crash information:"
-          find ./test-results -name "*.log" -exec grep -l "FATAL\|AndroidRuntime\|Crashed" {} \; 2>/dev/null || echo "No crash logs found"
-          
-          echo ""
-          echo "📱 Device Test Matrix Results:"
-          
-          # Parse any test result files for pass/fail
-          find ./test-results -name "*.xml" -o -name "*.json" | while read file; do
-            echo "File: $file"
-            if grep -q "test-case" "$file" 2>/dev/null; then
-              echo "  - Contains test cases"
-            fi
-            if grep -q "success\|passed" "$file" 2>/dev/null; then
-              echo "  - ✅ Contains successful tests"
-            fi
-            if grep -q "failed\|error" "$file" 2>/dev/null; then
-              echo "  - ❌ Contains failed tests"
-            fi
-          done
+        echo ""
+        echo "Parser exit code: $PARSER_EXIT_CODE"
+        if [ $PARSER_EXIT_CODE -eq 0 ]; then
+          echo "✅ Python parser completed successfully"
+        else
+          echo "❌ Python parser found issues (exit code: $PARSER_EXIT_CODE)"
         fi
         
-        # Generate crash summary
+        # Also run basic crash analysis as backup
         echo ""
-        echo "🚨 CRASH ANALYSIS SUMMARY:"
+        echo "🔍 Additional crash information..."
         if [ -d "./test-results" ]; then
           CRASH_COUNT=$(find ./test-results -name "*.log" -exec grep -c "FATAL\|AndroidRuntime.*Process:" {} \; 2>/dev/null | awk '{sum += $1} END {print sum+0}')
           echo "Total FATAL exceptions found: $CRASH_COUNT"
           
           if [ "$CRASH_COUNT" -gt 0 ]; then
             echo "⚠️  CRASHES DETECTED! Check detailed logs above."
-            find ./test-results -name "*.log" -exec grep -H "FATAL\|AndroidRuntime.*Process:" {} \;
+            find ./test-results -name "*.log" -exec grep -H "FATAL\|AndroidRuntime.*Process:" {} \; 2>/dev/null || true
           else
             echo "✅ NO CRASHES DETECTED - All tests passed without FATAL exceptions"
           fi
-        else
-          echo "ℹ️  No test results available for crash analysis"
         fi
         
     - name: 📎 Upload Test Results
@@ -325,3 +325,156 @@ jobs:
         else
           echo "❌ Android pipeline failed - check logs above"
         fi
+
+  # Job 4: Crashlytics Verification
+  crashlytics-verify:
+    name: 🔥 Crashlytics Verification
+    runs-on: ubuntu-latest
+    needs: [build-apk]
+    if: always() || github.event.inputs.build_type == 'full'
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 📥 Download Debug APK
+      uses: actions/download-artifact@v3
+      with:
+        name: debug-apk
+        path: ./
+        
+    - name: 🔍 Check Crashlytics Configuration
+      run: |
+        echo "=== CRASHLYTICS CONFIGURATION CHECK ==="
+        
+        # Check if google-services.json exists and is not placeholder
+        if [ -f "app/google-services.json" ]; then
+          echo "✅ Found google-services.json file"
+          
+          # Check if it's the placeholder file
+          if grep -q "placeholder" app/google-services.json; then
+            echo "⚠️  google-services.json is a placeholder file"
+            echo "   Crashlytics will NOT be active until real configuration is added"
+            echo "   Action required: Replace app/google-services.json with real Firebase config"
+          else
+            echo "✅ google-services.json appears to be a real configuration file"
+            echo "   Crashlytics should be active for this build"
+          fi
+        else
+          echo "❌ No google-services.json file found"
+          echo "   Crashlytics will NOT be active"
+          echo "   Action required: Add google-services.json to app/ directory"
+        fi
+        
+        # Check for Firebase service account secret
+        if [ -n "$FIREBASE_SERVICE_ACCOUNT" ]; then
+          echo "✅ FIREBASE_SERVICE_ACCOUNT secret is configured"
+          echo "   Firebase operations can be performed"
+        else
+          echo "⚠️  FIREBASE_SERVICE_ACCOUNT secret not configured"
+          echo "   Limited Firebase functionality available"
+        fi
+        
+        # Check build.gradle.kts for Crashlytics dependencies
+        echo ""
+        echo "🔍 Checking Crashlytics dependencies in build.gradle.kts:"
+        if grep -q "firebase-crashlytics" app/build.gradle.kts; then
+          echo "✅ Crashlytics dependency found in build.gradle.kts"
+        else
+          echo "❌ Crashlytics dependency missing in build.gradle.kts"
+        fi
+        
+        if grep -q "google-services" app/build.gradle.kts; then
+          echo "✅ Google Services plugin found in build.gradle.kts"
+        else
+          echo "❌ Google Services plugin missing in build.gradle.kts"
+        fi
+        
+        # Generate summary
+        echo ""
+        echo "📊 CRASHLYTICS STATUS SUMMARY:"
+        
+        CRASHLYTICS_READY=false
+        
+        if [ -f "app/google-services.json" ] && ! grep -q "placeholder" app/google-services.json; then
+          echo "✅ CONFIGURATION: Ready"
+          CRASHLYTICS_READY=true
+        else
+          echo "❌ CONFIGURATION: Needs setup"
+        fi
+        
+        if grep -q "firebase-crashlytics" app/build.gradle.kts; then
+          echo "✅ DEPENDENCIES: Present"
+        else
+          echo "❌ DEPENDENCIES: Missing"
+        fi
+        
+        echo ""
+        if [ "$CRASHLYTICS_READY" = true ]; then
+          echo "🚀 CRASHLYTICS: FULLY ACTIVE"
+          echo "   - Crash reports will be automatically uploaded"
+          echo "   - View crashes in Firebase Console"
+          echo "   - Non-fatal crashes included"
+        else
+          echo "⚠️  CRASHLYTICS: NEEDS CONFIGURATION"
+          echo "   - Install real google-services.json file"
+          echo "   - Set up Firebase project for this app"
+          echo "   - See README for setup instructions"
+        fi
+        
+    - name: 📋 Create Crashlytics Setup Guide
+      if: always()
+      run: |
+        cat > CRASHLYTICS_SETUP.md << 'EOF'
+        # Firebase Crashlytics Setup Guide
+        
+        ## Current Status
+        - ✅ Crashlytics dependencies added to build.gradle.kts
+        - ✅ Google Services plugin configured
+        - ⚠️  google-services.json needs to be configured
+        
+        ## Setup Steps
+        
+        ### 1. Create Firebase Project
+        1. Go to [Firebase Console](https://console.firebase.google.com/)
+        2. Click "Add Project"
+        3. Follow the setup wizard
+        
+        ### 2. Add Android App to Firebase
+        1. In Firebase Console, click "Add app" → Android
+        2. Package name: `com.aikeyboard`
+        3. App nickname: `AI Keyboard`
+        4. Debug signing certificate: (optional for now)
+        5. Click "Register app"
+        
+        ### 3. Download google-services.json
+        1. Click "Download google-services.json"
+        2. Place the file in `app/` directory (replace existing placeholder)
+        3. Commit and push to main branch
+        
+        ### 4. Verify Setup
+        After adding real google-services.json:
+        - Crashlytics will automatically start collecting crash reports
+        - Non-fatal exceptions will be uploaded
+        - View crashes in Firebase Console → Crashlytics
+        
+        ## Verification
+        The CI/CD pipeline includes a Crashlytics verification job that:
+        - Checks for valid google-services.json configuration
+        - Validates Crashlytics dependencies
+        - Reports setup status in workflow logs
+        
+        ## Troubleshooting
+        - Make sure google-services.json is not the placeholder file
+        - Verify package name matches in Firebase and app/build.gradle.kts
+        - Check Firebase Console for project setup issues
+        EOF
+        
+        echo "Crashlytics setup guide created: CRASHLYTICS_SETUP.md"
+        
+    - name: 📎 Upload Crashlytics Guide
+      uses: actions/upload-artifact@v3
+      with:
+        name: crashlytics-setup-guide
+        path: CRASHLYTICS_SETUP.md
+        retention-days: 30

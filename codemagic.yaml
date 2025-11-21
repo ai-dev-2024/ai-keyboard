@@ -1,0 +1,165 @@
+# Codemagic CI/CD configuration for AI Keyboard
+# This file enables zero-configuration cloud builds with automatic BrowserStack testing
+
+workflows:
+  android-debug:
+    name: Android Debug Build
+    max_build_duration: 30
+    
+    # Trigger builds automatically on every push to main/develop
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+        - pattern: 'develop'
+          include: true
+    
+    # Environment configuration
+    environment:
+      android_signing:
+        - keystore_reference
+      variables:
+        # BrowserStack credentials (set in Codemagic project variables)
+        BROWSERSTACK_USERNAME: $BROWSERSTACK_USERNAME
+        BROWSERSTACK_ACCESS_KEY: $BROWSERSTACK_ACCESS_KEY
+        # App identifier
+        APP_ID: com.aikeyboard
+    
+    # Build configuration
+    building:
+      android_signing:
+        - keystore_reference
+    
+    # Android build settings
+    android_build:
+      # Build debug APK only for testing
+      artifact_type: apk
+      build_type: debug
+    
+    # Scripts to run before build
+    before_build:
+      - echo "🚀 Starting AI Keyboard cloud build..."
+      - echo "📱 App ID: $APP_ID"
+      - echo "🌍 BrowserStack username set: ${BROWSERSTACK_USERNAME:+Yes}"
+    
+    # Build commands
+    build_script:
+      - |
+        #!/bin/bash
+        set -e
+        
+        echo "🔧 Running Gradle build..."
+        ./gradlew assembleDebug --no-daemon --info
+        
+        echo "✅ Build completed successfully!"
+        
+        # Find the APK path
+        APK_PATH=$(find app/build/outputs/apk -name "*.apk" | head -1)
+        echo "📦 APK created at: $APK_PATH"
+        echo "📋 APK_PATH=$APK_PATH" >> $CM_ENV # Export for next steps
+        
+    # Scripts to run after build
+    after_build:
+      - |
+        #!/bin/bash
+        set -e
+        
+        echo "🎯 Build artifacts:"
+        ls -la app/build/outputs/apk/debug/
+        
+        # Run BrowserStack upload if credentials are available
+        if [[ -n "$BROWSERSTACK_USERNAME" && -n "$BROWSERSTACK_ACCESS_KEY" ]]; then
+          echo "🚀 Uploading to BrowserStack for cloud testing..."
+          chmod +x scripts/upload_to_browserstack.sh
+          ./scripts/upload_to_browserstack.sh
+        else
+          echo "⚠️  BrowserStack credentials not set. Skipping upload."
+          echo "📱 To enable BrowserStack testing, set these environment variables in Codemagic:"
+          echo "   - BROWSERSTACK_USERNAME"
+          echo "   - BROWSERSTACK_ACCESS_KEY"
+        fi
+    
+    # Publishing configuration
+    publishing:
+      # Email notifications (optional - configure in Codemagic UI)
+      email:
+        recipients:
+          - # Add your email here
+        notify:
+          success: true
+          failure: true
+      
+      # Webhook notifications (optional)
+      webhooks:
+        - url: # Add webhook URL here for Slack/Discord notifications
+          headers:
+            # Add authentication headers if needed
+          events:
+            - build
+            - success
+            - failure
+    
+    # Caching configuration for faster builds
+    caching:
+      cache_paths:
+        - $CM_BUILD_DIR/.gradle/caches
+        - $CM_BUILD_DIR/gradle/wrapper
+        - $HOME/.android/build-cache
+      
+      cache_key: ${{ CM_BRANCH }}-${{ CM_COMMIT }}-${{ CM_COMMIT_MESSAGE }}
+      restore_cache:
+        - $CM_BUILD_DIR/.gradle/caches
+        - $CM_BUILD_DIR/gradle/wrapper
+        - $HOME/.android/build-cache
+
+# Additional workflows for different build types
+workflows:
+  android-release:
+    name: Android Release Build
+    max_build_duration: 30
+    
+    triggering:
+      events:
+        - tag
+      branch_patterns:
+        - pattern: 'main'
+          include: true
+          source: true
+    
+    environment:
+      android_signing:
+        - keystore_reference
+      variables:
+        APP_ID: com.aikeyboard
+    
+    android_build:
+      artifact_type: aab
+      build_type: release
+    
+    build_script:
+      - |
+        #!/bin/bash
+        set -e
+        
+        echo "🔧 Building release AAB for Play Store..."
+        ./gradlew bundleRelease --no-daemon
+        echo "✅ Release build completed!"
+    
+    publishing:
+      # Auto-upload to Play Store (requires service account setup)
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal # or 'alpha', 'beta', 'production'
+        
+# Definitions for shared configuration
+definitions:
+  android_signing:
+    keystore_reference:
+      # Keystore configuration (set in Codemagic project settings)
+      # For now, using environment variables
+      keystore: ${CM_KEYSTORE_PATH}
+      keystore_password: ${CM_KEYSTORE_PASSWORD}
+      key_alias: ${CM_KEY_ALIAS}
+      key_password: ${CM_KEY_PASSWORD}

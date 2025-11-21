@@ -8,7 +8,7 @@
 [![Platform](https://img.shields.io/badge/platform-Android-green.svg)](https://www.android.com)
 [![Minimum SDK](https://img.shields.io/badge/min%20SDK-26-orange.svg)](https://developer.android.com/about/versions/oreo)
 
-[Features](#-features) • [Installation](#-installation) • [Models](#-supported-models) • [Privacy](#-privacy) • [Contributing](#-contributing)
+[Features](#-features) • [Installation](#-installation) • [Models](#-supported-models) • [Privacy](#-privacy) • [Contributing](#-contributing) • [Cloud Build](#-cloud-build--testing)
 
 </div>
 

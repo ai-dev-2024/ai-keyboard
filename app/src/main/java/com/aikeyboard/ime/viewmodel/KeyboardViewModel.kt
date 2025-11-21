@@ -53,7 +53,7 @@ class KeyboardViewModel @Inject constructor(
     private val _isVoiceRecording = MutableStateFlow(false)
     val isVoiceRecording: StateFlow<Boolean> = _isVoiceRecording.asStateFlow()
 
-    val partialTranscription = voiceInputService.partialTranscription.asStateFlow()
+    val partialTranscription = voiceInputService.partialTranscription
 
     fun updateCurrentText(text: String) {
         _currentText.value = text

@@ -5,3 +5,14 @@
 -dontwarn com.microsoft.onnxruntime.**
 -dontwarn com.alphacephei.vosk.**
 
+
+
+
+
+
+
+
+
+
+
+

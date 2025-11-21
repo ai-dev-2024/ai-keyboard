@@ -10,6 +10,9 @@
 
 [Features](#-features) • [Installation](#-installation) • [Models](#-supported-models) • [Privacy](#-privacy) • [Contributing](#-contributing) • [Cloud Build](#-cloud-build--testing)
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/ai-dev-2024/ai-keyboard/actions)
+[![Firebase Test Lab](https://img.shields.io/badge/Firebase%20Test%20Lab-Cloud%20Testing-blue.svg)](https://firebase.google.com/docs/test-lab)
+
 </div>
 
 ---
@@ -327,6 +330,41 @@ Love AI Keyboard? Support development on Ko-fi:
 - Uses Apache-2.0 compatible libraries only
 - No GPL code included
 - Special thanks to all contributors and the open-source community
+
+---
+
+## ☁️ Cloud Build & Testing
+
+**AI Keyboard uses 100% free, zero-cost, cloud-based Android build and testing workflow powered by GitHub Actions and Firebase Test Lab.**
+
+### 🚀 Automatic Cloud Pipeline
+
+- **GitHub Actions**: Automated builds on every push to main branch
+- **Firebase Test Lab**: Free-tier cloud testing with real Android devices
+- **Zero Configuration**: No API keys, tokens, or manual setup required
+- **Always Current**: Latest Android SDK and build tools automatically
+
+### 🏗️ Build Process
+
+Every commit triggers:
+1. **Gradle Build**: `./gradlew assembleDebug`
+2. **APK Upload**: Built APK saved as GitHub artifact
+3. **Firebase Testing**: Automated robo testing on Android devices
+4. **Results**: Test results logged in GitHub Actions
+
+### 📱 Test Coverage
+
+- **Device Matrix**: Pixel 3, Pixel 4, Pixel 5, Samsung Galaxy S10
+- **API Levels**: Android 10, 11, 12, 13
+- **Robo Testing**: Automated UI interaction testing
+- **Zero Cost**: Uses free tier quotas
+
+### ✅ Badge Status
+
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
+![Firebase Test Lab](https://img.shields.io/badge/Firebase%20Test%20Lab-Active-blue.svg)
+
+**No emulator or Android Studio required!** Just push code and test automatically in the cloud.
 
 ---
 

@@ -24,3 +24,14 @@ interface DictionaryDao {
     suspend fun clearAll()
 }
 
+
+
+
+
+
+
+
+
+
+
+

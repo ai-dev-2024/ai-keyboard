@@ -1,6 +1,8 @@
 package com.aikeyboard.ime.ui
 
 import androidx.compose.animation.core.*
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -36,14 +38,15 @@ fun VoiceWaveform(
     }
     
     // Animated color
-    val color by animationState.animateColor(
+    val colorTransition = rememberInfiniteTransition(label = "waveform_color")
+    val color by colorTransition.animateColor(
         initialValue = AITeal.copy(alpha = 0.6f),
         targetValue = AITeal.copy(alpha = 1f),
         animationSpec = infiniteRepeatable(
             animation = tween(1000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "waveform_color"
+        label = "waveform_color_anim"
     )
     
     Box(

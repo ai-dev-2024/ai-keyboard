@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.aikeyboard.clipboard.data.ClipboardDao
-import kotlinx.coroutines.flow.collectAsState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -116,4 +115,7 @@ fun ClipboardItem(
         }
     }
 }
+
+
+
 

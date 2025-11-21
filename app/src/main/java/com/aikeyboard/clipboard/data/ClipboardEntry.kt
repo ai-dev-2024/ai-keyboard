@@ -13,3 +13,14 @@ data class ClipboardEntry(
     val isPinned: Boolean = false
 )
 
+
+
+
+
+
+
+
+
+
+
+

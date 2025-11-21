@@ -60,3 +60,14 @@ Ko-fi: https://ko-fi.com/ai_dev_2024
 
 **Last Updated**: November 2024
 
+
+
+
+
+
+
+
+
+
+
+

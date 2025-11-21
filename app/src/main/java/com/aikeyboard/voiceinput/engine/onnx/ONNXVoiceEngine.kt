@@ -4,7 +4,7 @@ import android.util.Log
 import com.aikeyboard.voiceinput.engine.EngineLoadResult
 import com.aikeyboard.voiceinput.engine.TranscriptionResult
 import com.aikeyboard.voiceinput.engine.VoiceEngine
-import com.microsoft.onnxruntime.*
+import ai.onnxruntime.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -49,7 +49,7 @@ class ONNXVoiceEngine : VoiceEngine {
         }
     }
 
-    override suspend fun unloadModel() = withContext(Dispatchers.Default) {
+    override suspend fun unloadModel(): Unit = withContext(Dispatchers.Default) {
         try {
             ortSession?.close()
             ortSession = null
@@ -89,10 +89,11 @@ class ONNXVoiceEngine : VoiceEngine {
         for (i in pcm16.indices) {
             floatBuffer.put(i, pcm16[i] / 32768.0f)
         }
+        floatBuffer.rewind()
 
         // Create input tensor (shape: [1, sequence_length])
         val inputShape = longArrayOf(1, pcm16.size.toLong())
-        val inputTensor = OnnxTensor.createTensor(ortEnv!!, floatBuffer.array(), inputShape)
+        val inputTensor = OnnxTensor.createTensor(ortEnv!!, floatBuffer, inputShape)
 
         // Run inference
         val inputs = mapOf("audio" to inputTensor)
@@ -100,7 +101,7 @@ class ONNXVoiceEngine : VoiceEngine {
 
         // Extract transcription (this is model-specific)
         // For Parakeet/Distil-Whisper, output is typically "text" or "transcription"
-        val outputTensor = outputs.firstOrNull()?.value as? Array<*>
+        val outputTensor = outputs.firstOrNull()?.value
         // TODO: Implement actual text decoding based on model architecture
         // This is a placeholder - real implementation needs tokenizer
         
@@ -135,4 +136,7 @@ class ONNXVoiceEngine : VoiceEngine {
         private const val TAG = "ONNXVoiceEngine"
     }
 }
+
+
+
 

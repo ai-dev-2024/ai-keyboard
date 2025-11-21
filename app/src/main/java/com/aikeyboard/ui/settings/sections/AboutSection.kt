@@ -9,16 +9,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aikeyboard.ui.settings.viewmodel.SettingsViewModel
 import com.aikeyboard.voiceinput.modelmanager.ModelLicenseRegistry
-import kotlinx.coroutines.flow.collectAsState
 
 @Composable
 fun AboutSection(
@@ -27,6 +28,7 @@ fun AboutSection(
 ) {
     val context = LocalContext.current
     val installedModels by viewModel.installedModels.collectAsState()
+    val colorScheme = MaterialTheme.colorScheme
 
     Column(
         modifier = Modifier
@@ -91,14 +93,11 @@ fun AboutSection(
                 )
                 Button(
                     onClick = {
-                        val intent = CustomTabsIntent.Builder()
-                            .setToolbarColor(MaterialTheme.colorScheme.primary.toArgb())
-                            .build()
-                            .intent
-                            .apply {
-                                data = Uri.parse("https://ko-fi.com/ai_dev_2024")
-                            }
-                        context.startActivity(intent)
+                        val builder = CustomTabsIntent.Builder()
+                        builder.setToolbarColor(colorScheme.primary.toArgb())
+                        val customTabsIntent = builder.build()
+                        customTabsIntent.intent.data = Uri.parse("https://ko-fi.com/ai_dev_2024")
+                        context.startActivity(customTabsIntent.intent)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(

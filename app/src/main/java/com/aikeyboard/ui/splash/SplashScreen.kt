@@ -63,7 +63,7 @@ fun SplashScreen(
                 contentDescription = "AI Keyboard",
                 modifier = Modifier
                     .size(120.dp)
-                    .alpha(alpha),
+                    .alpha(alpha.value),
                 tint = MaterialTheme.colorScheme.onPrimary
             )
             
@@ -72,14 +72,14 @@ fun SplashScreen(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.alpha(alpha)
+                modifier = Modifier.alpha(alpha.value)
             )
             
             Text(
                 text = "Offline AI Voice Typing",
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                modifier = Modifier.alpha(alpha)
+                modifier = Modifier.alpha(alpha.value)
             )
         }
     }

@@ -28,3 +28,14 @@ interface ClipboardDao {
     suspend fun clearAll()
 }
 
+
+
+
+
+
+
+
+
+
+
+

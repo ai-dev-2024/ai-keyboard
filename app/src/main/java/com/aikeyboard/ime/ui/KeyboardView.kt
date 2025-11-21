@@ -92,52 +92,6 @@ fun KeyboardView(
 }
 
 @Composable
-fun SuggestionsBar(
-    suggestions: List<String>,
-    onSuggestionClick: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(40.dp)
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(8.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        suggestions.forEach { suggestion ->
-            SuggestionChip(
-                text = suggestion,
-                onClick = { onSuggestionClick(suggestion) }
-            )
-        }
-    }
-}
-
-@Composable
-fun SuggestionChip(
-    text: String,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        modifier = Modifier.padding(vertical = 2.dp)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-    }
-}
-
-@Composable
 fun KeyButton(
     text: String,
     modifier: Modifier = Modifier,
@@ -162,4 +116,14 @@ fun KeyButton(
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
 

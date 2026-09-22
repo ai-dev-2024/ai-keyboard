@@ -16,7 +16,7 @@ This folder contains marketing materials for AI Keyboard launch and promotion.
 
 1. Use the launch thread for a multi-tweet announcement
 2. Use the short announcement for a single tweet
-3. Tag [[removed]]([removed]) for mentions
+3. Tag  for mentions
 
 ### Reddit
 
@@ -59,14 +59,12 @@ Recommended hashtags:
 ## Links
 
 - **GitHub**: https://github.com/ai-dev-2024
-- **X/Twitter**: [removed]
 - **Ko-fi**: https://ko-fi.com/ai_dev_2024
 - **Play Store**: *(Link will be added after release)*
 
 ---
 
 **Last Updated**: November 2024
-
 
 
 

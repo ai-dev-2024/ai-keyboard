@@ -372,7 +372,6 @@ AI Keyboard is developed by a solo developer working with AI assistants (like Cu
 
 ### Contact
 
-- **X/Twitter**: [[removed]]([removed])
 - **Ko-fi**: [https://ko-fi.com/ai_dev_2024](https://ko-fi.com/ai_dev_2024)
 
 ---
@@ -384,7 +383,6 @@ By contributing, you agree that your contributions will be licensed under the Ap
 ---
 
 **Thank you for contributing to AI Keyboard! 🎉**
-
 
 
 

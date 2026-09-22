@@ -338,7 +338,6 @@ See [Model Guide](MODEL_GUIDE.md) for detailed information.
 - **Documentation**: See `docs/` folder
 - **Issues**: [GitHub Issues](https://github.com/ai-dev-2024/ai-keyboard/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ai-dev-2024/ai-keyboard/discussions)
-- **X/Twitter**: [[removed]]([removed])
 
 ### Reporting Issues
 
@@ -354,7 +353,6 @@ When reporting issues, please include:
 **Last Updated**: November 2024
 
 **AI Keyboard** — Type faster. Speak naturally. Stay private.
-
 
 
 

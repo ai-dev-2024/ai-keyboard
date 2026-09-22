@@ -148,7 +148,6 @@ Welcome to AI Keyboard! This is the first public release of AI Keyboard, featuri
 - **Documentation**: See `docs/` folder in repository
 - **GitHub Issues**: [Report issues](https://github.com/ai-dev-2024/ai-keyboard/issues)
 - **GitHub Discussions**: [Ask questions](https://github.com/ai-dev-2024/ai-keyboard/discussions)
-- **X/Twitter**: [[removed]]([removed])
 
 ### Supporting Development
 
@@ -169,7 +168,6 @@ See [LICENSE](LICENSE) for details.
 ## 🔗 Links
 
 - **GitHub**: https://github.com/ai-dev-2024
-- **X/Twitter**: [removed]
 - **Ko-fi**: https://ko-fi.com/ai_dev_2024
 - **Play Store**: *(Link will be added after release)*
 
@@ -190,7 +188,6 @@ Stay tuned for updates, and thank you for using AI Keyboard!
 ---
 
 **AI Keyboard** — Your AI. Your models. Your data. 🚀
-
 
 
 

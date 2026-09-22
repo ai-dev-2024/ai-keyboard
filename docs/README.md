@@ -64,12 +64,10 @@ docs/
 
 - **Issues**: [GitHub Issues](https://github.com/ai-dev-2024/ai-keyboard/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/ai-dev-2024/ai-keyboard/discussions)
-- **X/Twitter**: [[removed]]([removed])
 
 ---
 
 **Last Updated**: November 2024
-
 
 
 

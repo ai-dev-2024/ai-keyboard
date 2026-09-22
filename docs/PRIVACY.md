@@ -193,7 +193,6 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 If you have any questions about this Privacy Policy, please contact us:
 
 - **Issues**: [GitHub Issues](https://github.com/ai-dev-2024/ai-keyboard/issues)
-- **X/Twitter**: [[removed]]([removed])
 - **Email**: *(Contact email will be added)*
 
 ---
@@ -216,7 +215,6 @@ If you have any questions about this Privacy Policy, please contact us:
 **Last Updated**: November 2024
 
 **AI Keyboard** — Your AI. Your models. Your data.
-
 
 
 

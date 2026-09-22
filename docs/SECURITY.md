@@ -236,7 +236,6 @@ If you discover a security vulnerability, please report it responsibly:
 
 - **Email**: *(Security email will be added)*
 - **GitHub Issues**: For non-sensitive security issues
-- **X/Twitter**: [[removed]]([removed]) (for public communication)
 
 ---
 
@@ -264,7 +263,6 @@ We will update this security policy as needed. Check this page regularly for upd
 **Last Updated**: November 2024
 
 **AI Keyboard** — Secure. Private. Offline.
-
 
 
 

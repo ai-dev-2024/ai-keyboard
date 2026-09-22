@@ -321,7 +321,6 @@ Love AI Keyboard? Support development on Ko-fi:
 ### Links
 
 - **GitHub**: [https://github.com/ai-dev-2024](https://github.com/ai-dev-2024)
-- **X/Twitter**: [[removed]]([removed])
 - **Ko-fi**: [https://ko-fi.com/ai_dev_2024](https://ko-fi.com/ai_dev_2024)
 
 ---
@@ -491,7 +490,6 @@ git push origin main
 
 - **Issues**: [GitHub Issues](https://github.com/ai-dev-2024/ai-keyboard/issues)
 - **Email**: *(Contact email will be added)*
-- **X/Twitter**: [[removed]]([removed])
 
 ---
 

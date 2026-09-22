@@ -191,13 +191,11 @@ speech recognition offline
 
 **Developer**: AI Keyboard Team  
 **GitHub**: https://github.com/ai-dev-2024  
-**X/Twitter**: [[removed]]([removed])  
 **Ko-fi**: https://ko-fi.com/ai_dev_2024  
 
 ---
 
 **Last Updated**: November 2024
-
 
 
 

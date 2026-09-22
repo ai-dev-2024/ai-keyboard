@@ -61,7 +61,6 @@ AI Keyboard is available on the Google Play Store as a freemium app, with option
 
 To learn more or support development, visit:  
 - **GitHub**: https://github.com/ai-dev-2024  
-- **X/Twitter**: [removed]  
 - **Ko-fi**: https://ko-fi.com/ai_dev_2024  
 
 ---
@@ -70,7 +69,6 @@ To learn more or support development, visit:
 
 **Developer**: AI Keyboard Team  
 **GitHub**: https://github.com/ai-dev-2024  
-**X/Twitter**: [[removed]]([removed])  
 **Ko-fi**: https://ko-fi.com/ai_dev_2024  
 
 ---
@@ -103,7 +101,6 @@ AI Keyboard is an open-source Android keyboard application that combines intelli
 ---
 
 **Last Updated**: November 2024
-
 
 
 

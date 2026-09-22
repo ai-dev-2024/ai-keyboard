@@ -43,13 +43,11 @@ Please maintain attribution to AI Keyboard and the developer.
 ## Contact
 
 For media inquiries:
-- **X/Twitter**: [[removed]]([removed])
 - **GitHub**: https://github.com/ai-dev-2024
 
 ---
 
 **Last Updated**: November 2024
-
 
 
 

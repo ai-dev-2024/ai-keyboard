@@ -2,7 +2,7 @@
 
 ## Completed Tasks
 
-1. ✅ Android SDK verification - SDK found at `C:\Users\Muhib\AppData\Local\Android\Sdk`
+1. ✅ Android SDK verification - SDK found at `C:\Users\YourUser\AppData\Local\Android\Sdk`
    - platform-tools: ✅
    - build-tools 34.0.0: ✅
    - platforms android-34: ✅

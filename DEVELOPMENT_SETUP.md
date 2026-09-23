@@ -4,7 +4,7 @@
 
 Your development environment is ready:
 - **Java**: 21.0.8 ✓
-- **Android SDK**: Installed at `C:\Users\Muhib\AppData\Local\Android\Sdk` ✓
+- **Android SDK**: Installed at `C:\Users\YourUser\AppData\Local\Android\Sdk` ✓
 - **ADB**: Available ✓
 - **Gradle**: Configured ✓
 

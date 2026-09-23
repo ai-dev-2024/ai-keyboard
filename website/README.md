@@ -179,8 +179,8 @@ Open Graph tags control how your site appears when shared on social media (Faceb
    - Find the "Open Graph Meta Tags" section in the `<head>`
    - Replace `[YOUR-USERNAME]` and `[YOUR-REPO]` with your actual values:
      ```html
-     <meta property="og:url" content="https://ai-dev-2024.github.io/AiKeyboard/">
-     <meta property="og:image" content="https://ai-dev-2024.github.io/AiKeyboard/og-image.png">
+     <meta property="og:url" content="https://ai-dev-2024.github.io/ai-keyboard/">
+     <meta property="og:image" content="https://ai-dev-2024.github.io/ai-keyboard/og-image.png">
      ```
 
 3. **Customize content** (optional):

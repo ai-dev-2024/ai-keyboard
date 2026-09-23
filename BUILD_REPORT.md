@@ -5,7 +5,7 @@
 ### 1. Android SDK Installation — COMPLETED ✅
 - ✅ SDK not found initially
 - ✅ Downloaded Android command-line tools (153 MB)
-- ✅ Extracted and installed to: `C:\Users\Muhib\AppData\Local\Android\Sdk`
+- ✅ Extracted and installed to: `C:\Users\YourUser\AppData\Local\Android\Sdk`
 - ✅ Installed required packages:
   - ✅ `platform-tools` (adb, fastboot)
   - ✅ `build-tools;34.0.0`
@@ -16,7 +16,7 @@
 ### 2. local.properties Creation — COMPLETED ✅
 - ✅ Created `local.properties` with SDK path:
   ```
-  sdk.dir=C\:\\Users\\Muhib\\AppData\\Local\\Android\\Sdk
+  sdk.dir=C\:\\Users\\YourUser\\AppData\\Local\\Android\\Sdk
   ```
 
 ### 3. Gradle Wrapper Setup — COMPLETED ✅
@@ -100,15 +100,15 @@ KSP (Kotlin Symbol Processing) is the modern replacement for KAPT and works with
 ## 📁 File Locations
 
 ### Android SDK
-- **Location:** `C:\Users\Muhib\AppData\Local\Android\Sdk`
-- **Platform Tools:** `C:\Users\Muhib\AppData\Local\Android\Sdk\platform-tools\adb.exe`
-- **Build Tools:** `C:\Users\Muhib\AppData\Local\Android\Sdk\build-tools\34.0.0`
-- **Platforms:** `C:\Users\Muhib\AppData\Local\Android\Sdk\platforms\android-34`
+- **Location:** `C:\Users\YourUser\AppData\Local\Android\Sdk`
+- **Platform Tools:** `C:\Users\YourUser\AppData\Local\Android\Sdk\platform-tools\adb.exe`
+- **Build Tools:** `C:\Users\YourUser\AppData\Local\Android\Sdk\build-tools\34.0.0`
+- **Platforms:** `C:\Users\YourUser\AppData\Local\Android\Sdk\platforms\android-34`
 
 ### Configuration Files
-- **local.properties:** `C:\Users\Muhib\Desktop\AiKeyboard\local.properties`
-- **gradle.properties:** `C:\Users\Muhib\Desktop\AiKeyboard\gradle.properties` (updated with JVM args)
-- **build.gradle.kts:** `C:\Users\Muhib\Desktop\AiKeyboard\app\build.gradle.kts` (fixed)
+- **local.properties:** `C:\Users\YourUser\Desktop\AiKeyboard\local.properties`
+- **gradle.properties:** `C:\Users\YourUser\Desktop\AiKeyboard\gradle.properties` (updated with JVM args)
+- **build.gradle.kts:** `C:\Users\YourUser\Desktop\AiKeyboard\app\build.gradle.kts` (fixed)
 
 ### Build Artifacts
 - **Debug APK:** `app/build/outputs/apk/debug/app-debug.apk` (NOT YET BUILT - blocked by KAPT)
